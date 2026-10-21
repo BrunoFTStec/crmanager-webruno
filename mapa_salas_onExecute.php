@@ -114,7 +114,7 @@ function crmMapaBuscarStatus($proprietario)
               AND cat.status = 'Ativo'
               AND st.idProprietario = " . (int) $proprietario . "
             GROUP BY st.atividadeStatus
-            ORDER BY ag.agrupador, st.id";
+            ORDER BY st.ordenador ASC, st.id ASC";
     sc_select(dsCrmMapaStatus, $sql);
     $status = array();
     if ({dsCrmMapaStatus} === false) return $status;
