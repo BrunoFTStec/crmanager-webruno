@@ -208,10 +208,9 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     $html = '<style>
     .crm-mapa{font:12px Arial,sans-serif;background:#f5f7fa;padding:12px;color:#24344b}
     .crm-mapa *{box-sizing:border-box}
-    .crm-filtros{display:flex;align-items:end;justify-content:center;flex-wrap:wrap;gap:10px;background:#fff;padding:12px;border:1px solid #e2e7ef;border-radius:8px;margin-bottom:9px}
-    .crm-filtros label{display:flex;flex-direction:column;gap:5px;font-weight:bold}
-    .crm-filtros select,.crm-filtros button{padding:7px;border:1px solid #cbd5e1;border-radius:5px}
-    .crm-filtros button{background:#155eef;color:white;cursor:pointer}
+    .crm-filtros{display:flex;align-items:flex-start;justify-content:center;flex-wrap:wrap;gap:10px;background:#fff;padding:12px;border:1px solid #e2e7ef;border-radius:8px;margin-bottom:9px}
+    .crm-filtros > label{display:flex;flex-direction:column;gap:5px;font-weight:bold;padding-top:0}
+    .crm-filtros select{padding:7px;border:1px solid #cbd5e1;border-radius:5px}
     .crm-status-filtro{display:flex;flex-direction:column;gap:5px;min-width:270px}
     .crm-status-titulo{font-weight:bold}
     .crm-status-opcoes{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:4px}
@@ -241,7 +240,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-cartao-status{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:600;margin-top:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .crm-cartao-bola{width:7px;height:7px;border-radius:50%;background:var(--crm-cor);flex-shrink:0}
     </style>';
-    $html .= '<div class="crm-mapa"><form class="crm-filtros" method="post"><label>Ano<select name="ano">';
+    $html .= '<div class="crm-mapa"><form class="crm-filtros" method="post" onchange="this.requestSubmit ? this.requestSubmit() : this.submit()"><label>Ano<select name="ano">';
     for ($ano=$anoAtual;$ano<=$anoAtual+2;$ano++) {
         $html .= '<option value="'.$ano.'"'.($ano===$filtros['ano']?' selected':'').'>'.$ano.'</option>';
     }
@@ -263,7 +262,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
         $marcado = in_array((int)$id, $filtros['status'], true) ? ' checked' : '';
         $html .= '<label class="crm-status-item"><input type="checkbox" name="status[]" value="'.(int)$id.'"'.$marcado.'><span>'.$this->crmMapaEsc($item['nome']).'</span></label>';
     }
-    $html .= '</div></div><button type="submit">Filtrar</button></form><div class="crm-legenda">';
+    $html .= '</div></div></form><div class="crm-legenda">';
     $legenda = array();
     foreach ($status as $item) $legenda[$item['nome']] = $item['cor'];
     foreach ($legenda as $nome=>$cor) $html .= '<span><i class="crm-bola" style="background:'.$cor.'"></i>'.$this->crmMapaEsc($nome).'</span>';
