@@ -24,7 +24,7 @@ function crmMapaExecutar($proprietario)
         'status' => isset($_POST['status']) ? (int) $_POST['status'] : 0
     );
     $salas = $this->crmMapaBuscarSalas($proprietario);
-    $status = $this->crmMapaBuscarStatus();
+    $status = $this->crmMapaBuscarStatus($proprietario);
     $eventos = $this->crmMapaBuscarEventos($proprietario, $filtros);
     echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos);
 }
@@ -60,15 +60,17 @@ function crmMapaBuscarSalas($proprietario)
     return array_values($salas);
 }
 
-function crmMapaBuscarStatus()
+function crmMapaBuscarStatus($proprietario)
 {
-    $sql = "SELECT st.id, ag.agrupador, ag.corHtml
+    $sql = "SELECT st.id, st.atividadeStatus, ag.corHtml
             FROM AtividadeParametroStatus st
             INNER JOIN AtividadeParametroCategoria cat ON cat.id = st.categoria
             LEFT JOIN AtividadeParametroAgrupador ag ON ag.idAgrupador = st.agrupador
             WHERE cat.modulo = 'GruposEventos'
               AND cat.nivel = 'Completo'
               AND cat.status = 'Ativo'
+              AND st.idProprietario = " . (int) $proprietario . "
+            GROUP BY st.atividadeStatus
             ORDER BY ag.agrupador, st.id";
     sc_select(dsCrmMapaStatus, $sql);
     $status = array();
