@@ -21,13 +21,36 @@ function crmMapaExecutar($proprietario)
         'ano' => $ano,
         'mes' => $mes,
         'hotel' => isset($_POST['hotel']) ? (int) $_POST['hotel'] : 0,
+        'gc' => isset($_POST['gc']) ? (string) $_POST['gc'] : '',
         'status' => isset($_POST['status']) ? (int) $_POST['status'] : 0
     );
     $salas = $this->crmMapaBuscarSalas($proprietario);
     $hoteis = $this->crmMapaBuscarHoteis($proprietario);
+    $gcs = $this->crmMapaBuscarGCs($proprietario);
+    if ($filtros['gc'] !== '' && !isset($gcs[$filtros['gc']])) $filtros['gc'] = '';
     $status = $this->crmMapaBuscarStatus($proprietario);
     $eventos = $this->crmMapaBuscarEventos($proprietario, $filtros);
-    echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis);
+    echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs);
+}
+
+function crmMapaBuscarGCs($proprietario)
+{
+    $sql = "SELECT DISTINCT sec_users.login, sec_users.name
+            FROM sec_users
+            INNER JOIN sec_users_proprietario
+                ON sec_users.login = sec_users_proprietario.login
+            WHERE sec_users_proprietario.idProprietario = " . (int) $proprietario . "
+            ORDER BY sec_users.name";
+    sc_select(dsCrmMapaGCs, $sql);
+    $gcs = array();
+    if ({dsCrmMapaGCs} === false) return $gcs;
+    while (!{dsCrmMapaGCs}->EOF) {
+        $login = (string) {dsCrmMapaGCs}->fields[0];
+        $gcs[$login] = (string) {dsCrmMapaGCs}->fields[1];
+        {dsCrmMapaGCs}->MoveNext();
+    }
+    {dsCrmMapaGCs}->Close();
+    return $gcs;
 }
 
 function crmMapaBuscarHoteis($proprietario)
@@ -158,7 +181,7 @@ function crmMapaEsc($valor)
     return htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
 }
 
-function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis)
+function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
 {
     $anoAtual = (int)date('Y');
     $meses = array(1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
@@ -201,7 +224,11 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis)
     foreach ($meses as $numero=>$nome) {
         $html .= '<option value="'.$numero.'"'.($numero===$filtros['mes']?' selected':'').'>'.$nome.'</option>';
     }
-    $html .= '</select></label><label>GC<select disabled><option>Todos</option></select></label>';
+    $html .= '</select></label><label>GC<select name="gc"><option value="">Todos</option>';
+    foreach ($gcs as $login=>$nome) {
+        $html .= '<option value="'.$this->crmMapaEsc($login).'"'.($filtros['gc']===$login?' selected':'').'>'.$this->crmMapaEsc($nome).'</option>';
+    }
+    $html .= '</select></label>';
     $html .= '<label>Hotel<select name="hotel"><option value="0">Todos</option>';
     foreach ($hoteis as $id=>$nome) {
         $html .= '<option value="'.$id.'"'.($filtros['hotel']===(int)$id?' selected':'').'>'.$this->crmMapaEsc($nome).'</option>';
