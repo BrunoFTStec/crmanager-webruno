@@ -1,4 +1,6 @@
 /* CRManager - Mapa de Salas
+ * Revisao Scriptcase 2026-10-21: chamadas internas de metodos via $this->.
+ * O Scriptcase incorpora funcoes do onExecute na classe da aplicacao.
  * Cole no evento onExecute da aplicacao Blank, sem abrir tags PHP.
  * Padrao do mapa anterior: sc_select, fields, MoveNext e Close.
  * Proprietario fixo temporariamente em 13.
