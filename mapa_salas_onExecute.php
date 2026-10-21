@@ -134,11 +134,11 @@ for($y=$anoAtual;$y<=$anoAtual+2;$y++) echo '<option value="'.$y.'"'.($y===$ano?
 echo '</select></label><label>Mês<select name="mes">';
 foreach($meses as $n=>$m) echo '<option value="'.$n.'"'.($n===$mes?' selected':'').'>'.crEsc($m).'</option>';
 echo '</select></label>';
-echo '<label>GC<select disabled title="Necessário confirmar o campo do GC"><option>Todos</option></select></label>';
+echo '<label>GC<select disabled title="Filtro de GC ainda não configurado"><option>Todos</option></select></label>';
 echo '<label>Hotel<select name="hotel[]" multiple size="3">';
 foreach($hoteis as $h) echo '<option value="'.$h.'"'.(in_array($h,$fHotel,true)?' selected':'').'>Hotel #'.$h.'</option>';
 echo '</select></label><div><b>Status</b><div class="checks">';
-foreach($status as $id=>$st) echo '<label><input type="checkbox" name="status[]" value="'.$id.'"'.(!$fStatus||in_array($id,$fStatus,true)?' checked':'').'>'.crEsc($st['nome']?:'Status '.$id).'</label>';
+foreach($status as $id=>$st) echo '<label><input type="checkbox" name="status[]" value="'.$id.'"'.(in_array($id,$fStatus,true)?' checked':'').'>'.crEsc($st['nome']?:'Status '.$id).'</label>';
 echo '</div></div><button type="submit">Filtrar</button></form><div class="legenda">';
 $leg=array();
 foreach($status as $st) $leg[$st['nome']]= $st['cor'];
