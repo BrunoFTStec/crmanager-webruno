@@ -145,7 +145,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
     $inicio = sprintf('%04d-%02d-01', $filtros['ano'], $filtros['mes']);
     $proximo = date('Y-m-d', strtotime($inicio . ' +1 month'));
     $sql = "SELECT os.idServico, os.dataInicio, os.dataFinal,
-                   a.idOrcamento, a.titulo, a.status, ag.agrupador, ag.corHtml, oc.numeroOrcamento
+                   a.idOrcamento, a.titulo, a.status, ag.agrupador, ag.corHtml, oc.numeroOrcamento, a.idAtividade
             FROM OrcamentoServico os
             INNER JOIN OrcamentoParametroServicoCategoria sc ON sc.idCategoria = os.categoria
             INNER JOIN Atividade a ON a.idOrcamento = os.idOrcamento
@@ -175,6 +175,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
                 'fim'=>substr((string){dsCrmMapaEventos}->fields[2],0,10),
                 'orcamento'=>(int){dsCrmMapaEventos}->fields[3],
                 'numeroOrcamento'=>(string){dsCrmMapaEventos}->fields[8],
+                'idAtividade'=>(int){dsCrmMapaEventos}->fields[9],
                 'titulo'=>(string){dsCrmMapaEventos}->fields[4],
                 'status'=>(string){dsCrmMapaEventos}->fields[6],
                 'cor'=>$this->crmMapaCor({dsCrmMapaEventos}->fields[7])
@@ -234,6 +235,8 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-linha .crm-dia{min-height:75px}
     .crm-linha .crm-nome{font-size:10px;font-weight:700;line-height:1.35}
     .crm-cartao{position:absolute;z-index:2;top:var(--crm-top);left:calc(220px + (var(--crm-inicio) - 1)*90px + 3px);width:calc(var(--crm-duracao)*90px - 6px);height:54px;background:color-mix(in srgb,var(--crm-cor) 12%,white);border:1px solid var(--crm-cor);border-radius:9px;padding:8px 6px;overflow:hidden;color:#123044;font-size:10px}
+    .crm-cartao:hover{filter:brightness(.98);box-shadow:0 2px 6px rgba(0,0,0,.12)}
+    .crm-cartao:focus-visible{outline:2px solid #155eef;outline-offset:2px}
     .crm-cartao-topo{display:flex;align-items:center;justify-content:space-between;gap:3px;min-width:0}
     .crm-cartao-titulo{font-size:10px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
     .crm-cartao-numero{font-size:9px;font-weight:700;color:#64748b;white-space:nowrap;flex-shrink:0}
@@ -296,9 +299,9 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
             while (isset($faixas[$faixa]) && $faixas[$faixa] >= $diaIni) $faixa++;
             $faixas[$faixa]=$diaFim;
             $top=8+$faixa*60;
-            $cartoes .= '<div class="crm-cartao" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].'" title="'.$this->crmMapaEsc($evento['titulo']).' - #'.$this->crmMapaEsc($evento['numeroOrcamento']).'">'
+            $cartoes .= '<a class="crm-cartao" href="https://www.ftsolution.myhoost.com/scriptcase/app/crmanagerV1/AtividadeRegistro/index.php?idAtiv='.(int)$evento['idAtividade'].'" target="_blank" rel="noopener noreferrer" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].';text-decoration:none;cursor:pointer" title="'.$this->crmMapaEsc($evento['titulo']).' - #'.$this->crmMapaEsc($evento['numeroOrcamento']).'">'
                 .'<div class="crm-cartao-topo"><span class="crm-cartao-titulo">'.$this->crmMapaEsc($evento['titulo']).'</span><span class="crm-cartao-numero">#'.$this->crmMapaEsc($evento['numeroOrcamento']).'</span></div>'
-                .'<div class="crm-cartao-status"><i class="crm-cartao-bola"></i><span>'.$this->crmMapaEsc($evento['status']).'</span></div></div>';
+                .'<div class="crm-cartao-status"><i class="crm-cartao-bola"></i><span>'.$this->crmMapaEsc($evento['status']).'</span></div></a>';
         }
         $altura=max(75,count($faixas)*60+10);
         $html .= '<div class="crm-linha" style="min-height:'.$altura.'px"><div class="crm-nome">'.$this->crmMapaEsc($sala['nome']).'</div>';
