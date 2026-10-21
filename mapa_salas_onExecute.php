@@ -22,13 +22,24 @@ function crmMapaExecutar($proprietario)
         'mes' => $mes,
         'hotel' => isset($_POST['hotel']) ? (int) $_POST['hotel'] : 0,
         'gc' => isset($_POST['gc']) ? (string) $_POST['gc'] : '',
-        'status' => isset($_POST['status']) ? (int) $_POST['status'] : 0
+        'status' => array()
     );
     $salas = $this->crmMapaBuscarSalas($proprietario);
     $hoteis = $this->crmMapaBuscarHoteis($proprietario);
     $gcs = $this->crmMapaBuscarGCs($proprietario);
     if ($filtros['gc'] !== '' && !isset($gcs[$filtros['gc']])) $filtros['gc'] = '';
     $status = $this->crmMapaBuscarStatus($proprietario);
+    // Primeira abertura: todos marcados. Envio sem marcados: nenhum evento.
+    if (!isset($_POST['status_enviado'])) {
+        $filtros['status'] = array_map('intval', array_keys($status));
+    } else {
+        $selecionados = isset($_POST['status']) && is_array($_POST['status']) ? $_POST['status'] : array();
+        foreach ($selecionados as $idStatus) {
+            $idStatus = (int) $idStatus;
+            if (isset($status[$idStatus])) $filtros['status'][$idStatus] = $idStatus;
+        }
+        $filtros['status'] = array_values($filtros['status']);
+    }
     $eventos = $this->crmMapaBuscarEventos($proprietario, $filtros);
     echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs);
 }
@@ -157,7 +168,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
     if ({dsCrmMapaEventos} === false) return $eventos;
     while (!{dsCrmMapaEventos}->EOF) {
         $statusId = (int) {dsCrmMapaEventos}->fields[5];
-        if ($filtros['status'] === 0 || $filtros['status'] === $statusId) {
+        if (in_array($statusId, $filtros['status'], true)) {
             $eventos[] = array(
                 'servico'=>(int){dsCrmMapaEventos}->fields[0],
                 'inicio'=>substr((string){dsCrmMapaEventos}->fields[1],0,10),
@@ -201,6 +212,12 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-filtros label{display:flex;flex-direction:column;gap:5px;font-weight:bold}
     .crm-filtros select,.crm-filtros button{padding:7px;border:1px solid #cbd5e1;border-radius:5px}
     .crm-filtros button{background:#155eef;color:white;cursor:pointer}
+    .crm-status-filtro{display:flex;flex-direction:column;gap:5px;min-width:270px}
+    .crm-status-titulo{font-weight:bold}
+    .crm-status-opcoes{display:grid;grid-template-columns:repeat(3,minmax(110px,1fr));gap:4px}
+    .crm-filtros .crm-status-item{display:flex;flex-direction:row;align-items:center;gap:5px;padding:5px 7px;border:1px solid #d8e0ea;background:#f7f9fc;border-radius:5px;font-weight:normal;font-size:10px;white-space:nowrap;cursor:pointer}
+    .crm-status-item input{margin:0;accent-color:#155eef}
+    @media(max-width:650px){.crm-status-opcoes{grid-template-columns:repeat(2,minmax(110px,1fr))}}
     .crm-legenda{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:9px}
     .crm-legenda span{background:white;padding:6px;border-radius:4px}
     .crm-bola{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
@@ -241,11 +258,12 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     foreach ($hoteis as $id=>$nome) {
         $html .= '<option value="'.$id.'"'.($filtros['hotel']===(int)$id?' selected':'').'>'.$this->crmMapaEsc($nome).'</option>';
     }
-    $html .= '</select></label><label>Status<select name="status"><option value="0">Todos</option>';
+    $html .= '</select></label><div class="crm-status-filtro"><span class="crm-status-titulo">Status</span><div class="crm-status-opcoes"><input type="hidden" name="status_enviado" value="1">';
     foreach ($status as $id=>$item) {
-        $html .= '<option value="'.$id.'"'.($filtros['status']===(int)$id?' selected':'').'>'.$this->crmMapaEsc($item['nome']).'</option>';
+        $marcado = in_array((int)$id, $filtros['status'], true) ? ' checked' : '';
+        $html .= '<label class="crm-status-item"><input type="checkbox" name="status[]" value="'.(int)$id.'"'.$marcado.'><span>'.$this->crmMapaEsc($item['nome']).'</span></label>';
     }
-    $html .= '</select></label><button type="submit">Filtrar</button></form><div class="crm-legenda">';
+    $html .= '</div></div><button type="submit">Filtrar</button></form><div class="crm-legenda">';
     $legenda = array();
     foreach ($status as $item) $legenda[$item['nome']] = $item['cor'];
     foreach ($legenda as $nome=>$cor) $html .= '<span><i class="crm-bola" style="background:'.$cor.'"></i>'.$this->crmMapaEsc($nome).'</span>';
