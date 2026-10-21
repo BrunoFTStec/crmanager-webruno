@@ -4,7 +4,7 @@
  * Proprietario fixo temporariamente em 13.
  */
 $crmMapaProprietario = 13;
-crmMapaExecutar($crmMapaProprietario);
+$this->crmMapaExecutar($crmMapaProprietario);
 
 function crmMapaExecutar($proprietario)
 {
@@ -21,10 +21,10 @@ function crmMapaExecutar($proprietario)
         'hotel' => isset($_POST['hotel']) ? (int) $_POST['hotel'] : 0,
         'status' => isset($_POST['status']) ? (int) $_POST['status'] : 0
     );
-    $salas = crmMapaBuscarSalas($proprietario);
-    $status = crmMapaBuscarStatus();
-    $eventos = crmMapaBuscarEventos($proprietario, $filtros);
-    echo crmMapaRenderizar($filtros, $salas, $status, $eventos);
+    $salas = $this->crmMapaBuscarSalas($proprietario);
+    $status = $this->crmMapaBuscarStatus();
+    $eventos = $this->crmMapaBuscarEventos($proprietario, $filtros);
+    echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos);
 }
 
 function crmMapaBuscarSalas($proprietario)
@@ -75,7 +75,7 @@ function crmMapaBuscarStatus()
         $id = (int) {dsCrmMapaStatus}->fields[0];
         $nome = (string) {dsCrmMapaStatus}->fields[1];
         $cor = (string) {dsCrmMapaStatus}->fields[2];
-        $status[$id] = array('nome'=>$nome, 'cor'=>crmMapaCor($cor));
+        $status[$id] = array('nome'=>$nome, 'cor'=>$this->crmMapaCor($cor));
         {dsCrmMapaStatus}->MoveNext();
     }
     {dsCrmMapaStatus}->Close();
@@ -116,7 +116,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
                 'orcamento'=>(int){dsCrmMapaEventos}->fields[3],
                 'titulo'=>(string){dsCrmMapaEventos}->fields[4],
                 'status'=>(string){dsCrmMapaEventos}->fields[6],
-                'cor'=>crmMapaCor({dsCrmMapaEventos}->fields[7])
+                'cor'=>$this->crmMapaCor({dsCrmMapaEventos}->fields[7])
             );
         }
         {dsCrmMapaEventos}->MoveNext();
@@ -183,16 +183,16 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos)
     $html .= '</select></label><label>GC<select disabled><option>Todos</option></select></label>';
     $html .= '<label>Hotel<select name="hotel"><option value="0">Todos</option>';
     foreach ($hoteis as $id=>$nome) {
-        $html .= '<option value="'.$id.'"'.($filtros['hotel']===(int)$id?' selected':'').'>'.crmMapaEsc($nome).'</option>';
+        $html .= '<option value="'.$id.'"'.($filtros['hotel']===(int)$id?' selected':'').'>'.$this->crmMapaEsc($nome).'</option>';
     }
     $html .= '</select></label><label>Status<select name="status"><option value="0">Todos</option>';
     foreach ($status as $id=>$item) {
-        $html .= '<option value="'.$id.'"'.($filtros['status']===(int)$id?' selected':'').'>'.crmMapaEsc($item['nome']).'</option>';
+        $html .= '<option value="'.$id.'"'.($filtros['status']===(int)$id?' selected':'').'>'.$this->crmMapaEsc($item['nome']).'</option>';
     }
     $html .= '</select></label><button type="submit">Filtrar</button></form><div class="crm-legenda">';
     $legenda = array();
     foreach ($status as $item) $legenda[$item['nome']] = $item['cor'];
-    foreach ($legenda as $nome=>$cor) $html .= '<span><i class="crm-bola" style="background:'.$cor.'"></i>'.crmMapaEsc($nome).'</span>';
+    foreach ($legenda as $nome=>$cor) $html .= '<span><i class="crm-bola" style="background:'.$cor.'"></i>'.$this->crmMapaEsc($nome).'</span>';
     $html .= '</div><div class="crm-scroll"><div class="crm-grade" style="--crm-dias:'.$dias.'">';
     $html .= '<div class="crm-cabecalho"><div class="crm-nome">Salas / Espaços</div>';
     for ($d=1;$d<=$dias;$d++) {
@@ -223,10 +223,10 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos)
             while (isset($faixas[$faixa]) && $faixas[$faixa] >= $diaIni) $faixa++;
             $faixas[$faixa]=$diaFim;
             $top=8+$faixa*54;
-            $cartoes .= '<div class="crm-cartao" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].'" title="'.crmMapaEsc($evento['titulo']).'"><strong>'.crmMapaEsc($evento['titulo']).' #'.$evento['orcamento'].'</strong><small>'.crmMapaEsc($evento['status']).'</small></div>';
+            $cartoes .= '<div class="crm-cartao" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].'" title="'.$this->crmMapaEsc($evento['titulo']).'"><strong>'.$this->crmMapaEsc($evento['titulo']).' #'.$evento['orcamento'].'</strong><small>'.$this->crmMapaEsc($evento['status']).'</small></div>';
         }
         $altura=max(75,count($faixas)*54+10);
-        $html .= '<div class="crm-linha" style="min-height:'.$altura.'px"><div class="crm-nome">'.crmMapaEsc($sala['nome']).'</div>';
+        $html .= '<div class="crm-linha" style="min-height:'.$altura.'px"><div class="crm-nome">'.$this->crmMapaEsc($sala['nome']).'</div>';
         for ($d=1;$d<=$dias;$d++) $html .= '<div class="crm-dia" style="min-height:'.$altura.'px"></div>';
         $html .= $cartoes.'</div>';
     }
