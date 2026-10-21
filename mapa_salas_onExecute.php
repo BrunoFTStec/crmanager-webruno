@@ -244,7 +244,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-cartao-bola{width:7px;height:7px;border-radius:50%;background:var(--crm-cor);flex-shrink:0}
     .crm-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55)}
     .crm-modal.crm-modal-aberto{display:flex}
-    .crm-modal-janela{width:min(1200px,96vw);height:min(850px,94dvh);background:white;border-radius:10px;box-shadow:0 15px 55px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+    .crm-modal-janela{width:min(1400px,98vw);height:min(850px,94dvh);background:white;border-radius:10px;box-shadow:0 15px 55px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
     .crm-modal-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:#f1f5f9;font-weight:bold;font-size:13px}
     .crm-modal-fechar{border:0;background:#e2e8f0;border-radius:5px;padding:6px 12px;cursor:pointer;font-weight:bold}
     .crm-modal-iframe{width:100%;height:100%;border:0;flex:1}
