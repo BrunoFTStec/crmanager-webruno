@@ -245,8 +245,6 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55)}
     .crm-modal.crm-modal-aberto{display:flex}
     .crm-modal-janela{width:min(1400px,98vw);height:min(850px,94dvh);background:white;border-radius:10px;box-shadow:0 15px 55px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
-    .crm-modal-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:#f1f5f9;font-weight:bold;font-size:13px}
-    .crm-modal-fechar{border:0;background:#e2e8f0;border-radius:5px;padding:6px 12px;cursor:pointer;font-weight:bold}
     .crm-modal-iframe{width:100%;height:100%;border:0;flex:1}
     </style>';
     $html .= '<div class="crm-mapa"><form class="crm-filtros" method="post" onchange="this.requestSubmit ? this.requestSubmit() : this.submit()"><label>Ano<select name="ano">';
@@ -315,20 +313,18 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
         $html .= $cartoes.'</div>';
     }
     $html .= '</div></div></div>';
-    $html .= '<div id="crm-modal-atividade" class="crm-modal" role="dialog" aria-modal="true" aria-label="Registro de atividade" aria-hidden="true"><div class="crm-modal-janela"><div class="crm-modal-barra"><span>Registro de atividade</span><button type="button" class="crm-modal-fechar" id="crm-modal-fechar">Fechar ×</button></div><iframe class="crm-modal-iframe" id="crm-modal-iframe" title="Registro de atividade" src="about:blank"></iframe></div></div>';
+    $html .= '<div id="crm-modal-atividade" class="crm-modal" role="dialog" aria-modal="true" aria-label="Registro de atividade" aria-hidden="true"><div class="crm-modal-janela"><iframe class="crm-modal-iframe" id="crm-modal-iframe" title="Registro de atividade" src="about:blank"></iframe></div></div>';
     $html .= '<script>
     (function(){
         var modal=document.getElementById("crm-modal-atividade");
         var frame=document.getElementById("crm-modal-iframe");
-        var fechar=document.getElementById("crm-modal-fechar");
-        if(!modal || !frame || !fechar)return;
-        function abrir(url){frame.src=url;modal.classList.add("crm-modal-aberto");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";fechar.focus();}
+        if(!modal || !frame)return;
+        function abrir(url){frame.src=url;modal.classList.add("crm-modal-aberto");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";}
         function encerrar(){modal.classList.remove("crm-modal-aberto");modal.setAttribute("aria-hidden","true");frame.src="about:blank";document.body.style.overflow="";}
         document.addEventListener("click",function(e){
             var link=e.target.closest("a[data-crm-modal]");
             if(link){e.preventDefault();abrir(link.href);}
         });
-        fechar.addEventListener("click",encerrar);
         modal.addEventListener("click",function(e){if(e.target===modal)encerrar();});
         document.addEventListener("keydown",function(e){if(e.key==="Escape" && modal.classList.contains("crm-modal-aberto"))encerrar();});
     })();
