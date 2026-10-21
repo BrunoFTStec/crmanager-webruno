@@ -1,9 +1,9 @@
 /* CRManager | Mapa de Salas | cole SOMENTE o conteúdo no onExecute da Blank (sem tags PHP).
-   Global necessária: [proprietario].
+   Proprietário fixo para testes: 13.
    Campos opcionais (GC, nome curto do hotel, formulário) dependem do esquema real.
    Chave de ocorrência: os.idOrcamentoServico (CONFIRMAR NO BANCO).
 */
-$prop = (int)[proprietario];
+$prop = 13;
 $ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('n');
 if ($ano < 2000 || $ano > 2100) $ano = (int)date('Y');
