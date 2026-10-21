@@ -1,12 +1,13 @@
 /* CRManager | Mapa de Salas | cole SOMENTE o conteúdo no onExecute da Blank (sem tags PHP).
-   Global necessária: [proprietario].
+   Proprietário fixo: 13.
    Campos opcionais (GC, nome curto do hotel, formulário) dependem do esquema real.
    Chave de ocorrência: os.idOrcamentoServico (CONFIRMAR NO BANCO).
 */
-$prop = (int)[proprietario];
-$ano = isset($_GET['ano']) ? (int)$_GET['ano'] : (int)date('Y');
+$prop = 13;
+$anoAtual = (int)date('Y');
+$ano = isset($_GET['ano']) ? (int)$_GET['ano'] : $anoAtual;
 $mes = isset($_GET['mes']) ? (int)$_GET['mes'] : (int)date('n');
-if ($ano < 2000 || $ano > 2100) $ano = (int)date('Y');
+if ($ano < $anoAtual || $ano > $anoAtual + 2) $ano = $anoAtual;
 if ($mes < 1 || $mes > 12) $mes = (int)date('n');
 $ini = sprintf('%04d-%02d-01', $ano, $mes);
 $prox = date('Y-m-d', strtotime($ini.' +1 month'));
@@ -129,7 +130,7 @@ echo '<style>
 </style>';
 echo '<div class="crm"><form method="get" class="filtros">';
 echo '<label>Ano<select name="ano">';
-for($y=$ano-3;$y<=$ano+3;$y++) echo '<option value="'.$y.'"'.($y===$ano?' selected':'').'>'.$y.'</option>';
+for($y=$anoAtual;$y<=$anoAtual+2;$y++) echo '<option value="'.$y.'"'.($y===$ano?' selected':'').'>'.$y.'</option>';
 echo '</select></label><label>Mês<select name="mes">';
 foreach($meses as $n=>$m) echo '<option value="'.$n.'"'.($n===$mes?' selected':'').'>'.crEsc($m).'</option>';
 echo '</select></label>';
