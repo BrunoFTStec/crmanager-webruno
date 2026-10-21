@@ -196,7 +196,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     $html = '<style>
     .crm-mapa{font:12px Arial,sans-serif;background:#f5f7fa;padding:12px;color:#24344b}
     .crm-mapa *{box-sizing:border-box}
-    .crm-filtros{display:flex;align-items:end;flex-wrap:wrap;gap:10px;background:#fff;padding:12px;border:1px solid #e2e7ef;border-radius:8px;margin-bottom:9px}
+    .crm-filtros{display:flex;align-items:end;justify-content:center;flex-wrap:wrap;gap:10px;background:#fff;padding:12px;border:1px solid #e2e7ef;border-radius:8px;margin-bottom:9px}
     .crm-filtros label{display:flex;flex-direction:column;gap:5px;font-weight:bold}
     .crm-filtros select,.crm-filtros button{padding:7px;border:1px solid #cbd5e1;border-radius:5px}
     .crm-filtros button{background:#155eef;color:white;cursor:pointer}
