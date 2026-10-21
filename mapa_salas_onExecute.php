@@ -204,7 +204,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-legenda{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:9px}
     .crm-legenda span{background:white;padding:6px;border-radius:4px}
     .crm-bola{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}
-    .crm-scroll{overflow:auto;max-height:75vh;background:white;border:1px solid #e2e7ef}
+    .crm-scroll{overflow:auto;height:calc(100dvh - 185px);min-height:350px;background:white;border:1px solid #e2e7ef}
     .crm-grade{min-width:max-content}
     .crm-cabecalho,.crm-linha,.crm-hotel{display:grid;grid-template-columns:220px repeat(var(--crm-dias),90px);position:relative}
     .crm-cabecalho{position:sticky;top:0;z-index:15;background:#edf2f7}
