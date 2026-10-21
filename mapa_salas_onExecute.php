@@ -3,9 +3,9 @@
  * O Scriptcase incorpora funcoes do onExecute na classe da aplicacao.
  * Cole no evento onExecute da aplicacao Blank, sem abrir tags PHP.
  * Padrao do mapa anterior: sc_select, fields, MoveNext e Close.
- * Proprietario fixo temporariamente em 13.
+ * Proprietario obtido da variavel global Scriptcase [proprietario].
  */
-$crmMapaProprietario = 13;
+$crmMapaProprietario = (int) [proprietario];
 $this->crmMapaExecutar($crmMapaProprietario);
 
 function crmMapaExecutar($proprietario)
