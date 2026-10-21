@@ -242,6 +242,12 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-cartao-numero{font-size:9px;font-weight:700;color:#64748b;white-space:nowrap;flex-shrink:0}
     .crm-cartao-status{display:flex;align-items:center;gap:4px;font-size:9px;font-weight:600;margin-top:8px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .crm-cartao-bola{width:7px;height:7px;border-radius:50%;background:var(--crm-cor);flex-shrink:0}
+    .crm-modal{position:fixed;inset:0;z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(15,23,42,.55)}
+    .crm-modal.crm-modal-aberto{display:flex}
+    .crm-modal-janela{width:min(1200px,96vw);height:min(850px,94dvh);background:white;border-radius:10px;box-shadow:0 15px 55px rgba(0,0,0,.25);display:flex;flex-direction:column;overflow:hidden}
+    .crm-modal-barra{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 14px;background:#f1f5f9;font-weight:bold;font-size:13px}
+    .crm-modal-fechar{border:0;background:#e2e8f0;border-radius:5px;padding:6px 12px;cursor:pointer;font-weight:bold}
+    .crm-modal-iframe{width:100%;height:100%;border:0;flex:1}
     </style>';
     $html .= '<div class="crm-mapa"><form class="crm-filtros" method="post" onchange="this.requestSubmit ? this.requestSubmit() : this.submit()"><label>Ano<select name="ano">';
     for ($ano=$anoAtual;$ano<=$anoAtual+2;$ano++) {
@@ -299,7 +305,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
             while (isset($faixas[$faixa]) && $faixas[$faixa] >= $diaIni) $faixa++;
             $faixas[$faixa]=$diaFim;
             $top=8+$faixa*60;
-            $cartoes .= '<a class="crm-cartao" href="https://www.ftsolution.myhoost.com/scriptcase/app/crmanagerV1/AtividadeRegistro/index.php?idAtiv='.(int)$evento['idAtividade'].'" target="_blank" rel="noopener noreferrer" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].';text-decoration:none;cursor:pointer" title="'.$this->crmMapaEsc($evento['titulo']).' - #'.$this->crmMapaEsc($evento['numeroOrcamento']).'">'
+            $cartoes .= '<a class="crm-cartao" href="https://www.ftsolution.myhoost.com/scriptcase/app/crmanagerV1/AtividadeRegistro/index.php?idAtiv='.(int)$evento['idAtividade'].'" data-crm-modal="1" style="--crm-inicio:'.$diaIni.';--crm-duracao:'.($diaFim-$diaIni+1).';--crm-top:'.$top.'px;--crm-cor:'.$evento['cor'].';text-decoration:none;cursor:pointer" title="'.$this->crmMapaEsc($evento['titulo']).' - #'.$this->crmMapaEsc($evento['numeroOrcamento']).'">'
                 .'<div class="crm-cartao-topo"><span class="crm-cartao-titulo">'.$this->crmMapaEsc($evento['titulo']).'</span><span class="crm-cartao-numero">#'.$this->crmMapaEsc($evento['numeroOrcamento']).'</span></div>'
                 .'<div class="crm-cartao-status"><i class="crm-cartao-bola"></i><span>'.$this->crmMapaEsc($evento['status']).'</span></div></a>';
         }
@@ -309,5 +315,23 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
         $html .= $cartoes.'</div>';
     }
     $html .= '</div></div></div>';
+    $html .= '<div id="crm-modal-atividade" class="crm-modal" role="dialog" aria-modal="true" aria-label="Registro de atividade" aria-hidden="true"><div class="crm-modal-janela"><div class="crm-modal-barra"><span>Registro de atividade</span><button type="button" class="crm-modal-fechar" id="crm-modal-fechar">Fechar ×</button></div><iframe class="crm-modal-iframe" id="crm-modal-iframe" title="Registro de atividade" src="about:blank"></iframe></div></div>';
+    $html .= '<script>
+    (function(){
+        var modal=document.getElementById("crm-modal-atividade");
+        var frame=document.getElementById("crm-modal-iframe");
+        var fechar=document.getElementById("crm-modal-fechar");
+        if(!modal || !frame || !fechar)return;
+        function abrir(url){frame.src=url;modal.classList.add("crm-modal-aberto");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";fechar.focus();}
+        function encerrar(){modal.classList.remove("crm-modal-aberto");modal.setAttribute("aria-hidden","true");frame.src="about:blank";document.body.style.overflow="";}
+        document.addEventListener("click",function(e){
+            var link=e.target.closest("a[data-crm-modal]");
+            if(link){e.preventDefault();abrir(link.href);}
+        });
+        fechar.addEventListener("click",encerrar);
+        modal.addEventListener("click",function(e){if(e.target===modal)encerrar();});
+        document.addEventListener("keydown",function(e){if(e.key==="Escape" && modal.classList.contains("crm-modal-aberto"))encerrar();});
+    })();
+    </script>';
     return $html;
 }
