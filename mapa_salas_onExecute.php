@@ -24,9 +24,29 @@ function crmMapaExecutar($proprietario)
         'status' => isset($_POST['status']) ? (int) $_POST['status'] : 0
     );
     $salas = $this->crmMapaBuscarSalas($proprietario);
+    $hoteis = $this->crmMapaBuscarHoteis($proprietario);
     $status = $this->crmMapaBuscarStatus($proprietario);
     $eventos = $this->crmMapaBuscarEventos($proprietario, $filtros);
-    echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos);
+    echo $this->crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis);
+}
+
+function crmMapaBuscarHoteis($proprietario)
+{
+    $sql = "SELECT idHotel, nome
+            FROM Hotel
+            WHERE status = 'Ativo'
+              AND idProprietario = " . (int) $proprietario . "
+            ORDER BY nome";
+    sc_select(dsCrmMapaHoteis, $sql);
+    $hoteis = array();
+    if ({dsCrmMapaHoteis} === false) return $hoteis;
+    while (!{dsCrmMapaHoteis}->EOF) {
+        $id = (int) {dsCrmMapaHoteis}->fields[0];
+        $hoteis[$id] = (string) {dsCrmMapaHoteis}->fields[1];
+        {dsCrmMapaHoteis}->MoveNext();
+    }
+    {dsCrmMapaHoteis}->Close();
+    return $hoteis;
 }
 
 function crmMapaBuscarSalas($proprietario)
@@ -138,7 +158,7 @@ function crmMapaEsc($valor)
     return htmlspecialchars((string)$valor, ENT_QUOTES, 'UTF-8');
 }
 
-function crmMapaRenderizar($filtros, $salas, $status, $eventos)
+function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis)
 {
     $anoAtual = (int)date('Y');
     $meses = array(1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',
@@ -147,9 +167,6 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos)
     $primeiro = sprintf('%04d-%02d-01', $filtros['ano'], $filtros['mes']);
     $ultimo = date('Y-m-t', strtotime($primeiro));
     $dias = (int)date('t', strtotime($primeiro));
-    $hoteis = array();
-    foreach ($salas as $sala) $hoteis[$sala['hotel']] = 'Hotel #' . $sala['hotel'];
-    ksort($hoteis);
 
     $html = '<style>
     .crm-mapa{font:12px Arial,sans-serif;background:#f5f7fa;padding:12px;color:#24344b}
@@ -209,7 +226,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos)
         if ($filtros['hotel'] > 0 && $filtros['hotel'] !== $sala['hotel']) continue;
         if ($hotelAnterior !== $sala['hotel']) {
             $hotelAnterior = $sala['hotel'];
-            $html .= '<div class="crm-hotel"><div class="crm-nome">Hotel #'.$hotelAnterior.'</div></div>';
+            $html .= '<div class="crm-hotel"><div class="crm-nome">'.$this->crmMapaEsc(isset($hoteis[$hotelAnterior]) ? $hoteis[$hotelAnterior] : 'Hotel #'.$hotelAnterior).'</div></div>';
         }
         $daSala = array();
         foreach ($eventos as $evento) {
