@@ -1,4 +1,4 @@
-/* CRManager | Mapa de Salas | cole no evento onExecute de uma aplicação Blank Scriptcase.
+/* CRManager | Mapa de Salas | cole SOMENTE o conteúdo no onExecute da Blank (sem tags PHP).
    Global necessária: [proprietario].
    Campos opcionais (GC, nome curto do hotel, formulário) dependem do esquema real.
    Chave de ocorrência: os.idOrcamentoServico (CONFIRMAR NO BANCO).
@@ -31,7 +31,7 @@ $sqlSalas="SELECT s.idServico,s.idHotel,s.servico,c.idServicoPai
  ORDER BY s.idHotel,s.servico,s.idServico";
 sc_lookup(dsSalas,$sqlSalas);
 $salas=[];$hoteis=[];
-if (isset({dsSalas}) && is_array({dsSalas})) foreach ({dsSalas} as $r) {
+if (!empty({dsSalas})) foreach ({dsSalas} as $r) {
  $id=(int)$r[0];$h=(int)$r[1];$hoteis[$h]=$h;
  if ($fHotel && !in_array($h,$fHotel,true)) continue;
  $ch=$h.':'.$id;
@@ -42,7 +42,7 @@ ksort($hoteis);
 $sqlComp="SELECT idServicoPai,idServicoFilho FROM OrcamentoParametroServicoTipoComposicao";
 sc_lookup(dsComp,$sqlComp);
 $familias=[];
-if (isset({dsComp}) && is_array({dsComp})) foreach ({dsComp} as $r) {
+if (!empty({dsComp})) foreach ({dsComp} as $r) {
  $p=(int)$r[0];$f=(int)$r[1];
  if ($p>0 && $f>0) {$familias[$p][$p]=$p;$familias[$p][$f]=$f;}
 }
@@ -60,12 +60,12 @@ $sqlStatus="SELECT st.id,ag.agrupador,ag.corHtml
  ORDER BY ag.agrupador,st.id";
 sc_lookup(dsStatus,$sqlStatus);
 $status=[];
-if (isset({dsStatus}) && is_array({dsStatus})) foreach ({dsStatus} as $r) {
+if (!empty({dsStatus})) foreach ({dsStatus} as $r) {
  $status[(int)$r[0]]=['nome'=>(string)$r[1],'cor'=>crCor($r[2])];
 }
 /* DISTINCT por ocorrência + atividade. Sem GROUP BY por orçamento: preserva serviços distintos.
    Se existirem várias atividades por orçamento, é necessário definir a regra da atividade vigente. */
-$sqlOcup="SELECT os.idOrcamentoServico,os.idServico,os.dataInicio,os.dataFinal,
+$sqlOcup="SELECT os.idServico,os.dataInicio,os.dataFinal,
  a.idOrcamento,a.titulo,a.status,ag.agrupador,ag.corHtml
  FROM OrcamentoServico os
  INNER JOIN OrcamentoParametroServicoCategoria sc ON sc.idCategoria=os.categoria
@@ -77,19 +77,19 @@ $sqlOcup="SELECT os.idOrcamentoServico,os.idServico,os.dataInicio,os.dataFinal,
  AND cat.modulo='GruposEventos' AND cat.nivel='Completo' AND cat.status='Ativo'
  AND sc.filtroMapa='Sim'
  AND os.dataInicio<'$prox' AND os.dataFinal>='$ini'
- ORDER BY os.dataInicio,os.idOrcamentoServico";
+ ORDER BY os.dataInicio,os.idServico";
 sc_lookup(dsOcup,$sqlOcup);
 $porServico=[];
-if (isset({dsOcup}) && is_array({dsOcup})) foreach ({dsOcup} as $r) {
- $st=(int)$r[6];if ($fStatus && !in_array($st,$fStatus,true)) continue;
- $start=max($ini,substr((string)$r[2],0,10));
- $end=min($ultimo,substr((string)$r[3],0,10));
+if (!empty({dsOcup})) foreach ({dsOcup} as $r) {
+ $st=(int)$r[5];if ($fStatus && !in_array($st,$fStatus,true)) continue;
+ $start=max($ini,substr((string)$r[1],0,10));
+ $end=min($ultimo,substr((string)$r[2],0,10));
  if ($start>$end) continue;
- $serv=(int)$r[1];
- $porServico[$serv][]=['chave'=>(string)$r[0].':'.$st.':'.(string)$r[4],
+ $serv=(int)$r[0];
+ $porServico[$serv][]=['chave'=>(string)$r[3].':'.$st.':'.(string)$r[1].':'.(string)$r[2],
  'inicio'=>(int)substr($start,8,2),'fim'=>(int)substr($end,8,2),
- 'titulo'=>(string)$r[5],'orc'=>(int)$r[4],
- 'status'=>(string)$r[7],'cor'=>crCor($r[8])];
+ 'titulo'=>(string)$r[4],'orc'=>(int)$r[3],
+ 'status'=>(string)$r[6],'cor'=>crCor($r[7])];
 }
 /* Montagem por linha: intervalos independentes e faixas para evitar sobreposição vertical. */
 $linhas=[];
