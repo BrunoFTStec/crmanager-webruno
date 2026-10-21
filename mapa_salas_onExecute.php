@@ -215,6 +215,7 @@ function crmMapaRenderizar($filtros, $salas, $status, $eventos, $hoteis, $gcs)
     .crm-hotel .crm-nome{background:#e8f0fb}
     .crm-linha{min-height:75px;border-bottom:1px solid #e5eaf0}
     .crm-linha .crm-dia{min-height:75px}
+    .crm-linha .crm-nome{font-size:10px;font-weight:700;line-height:1.35}
     .crm-cartao{position:absolute;z-index:2;top:var(--crm-top);left:calc(220px + (var(--crm-inicio) - 1)*90px + 3px);width:calc(var(--crm-duracao)*90px - 6px);height:49px;background:#f0f4fa;border-left:5px solid var(--crm-cor);border-radius:5px;padding:6px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
     .crm-cartao strong,.crm-cartao small{display:block;overflow:hidden;text-overflow:ellipsis}
     </style>';
