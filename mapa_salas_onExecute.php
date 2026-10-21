@@ -138,6 +138,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
             FROM OrcamentoServico os
             INNER JOIN OrcamentoParametroServicoCategoria sc ON sc.idCategoria = os.categoria
             INNER JOIN Atividade a ON a.idOrcamento = os.idOrcamento
+            INNER JOIN Orcamento oc ON oc.idOrcamento = a.idOrcamento
             INNER JOIN AtividadeParametroStatus st ON st.id = a.status
             INNER JOIN AtividadeParametroCategoria cat ON cat.id = st.categoria
             LEFT JOIN AtividadeParametroAgrupador ag ON ag.idAgrupador = st.agrupador
@@ -147,6 +148,7 @@ function crmMapaBuscarEventos($proprietario, $filtros)
               AND cat.nivel = 'Completo'
               AND cat.status = 'Ativo'
               AND sc.filtroMapa = 'Sim'
+              " . ($filtros['gc'] !== '' ? " AND oc.responsavelCotacao = '" . addslashes($filtros['gc']) . "'" : "") . "
               AND os.dataInicio < '" . $proximo . "'
               AND os.dataFinal >= '" . $inicio . "'
             ORDER BY os.dataInicio, os.idServico";
