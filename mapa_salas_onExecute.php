@@ -1,7 +1,7 @@
 /* CRManager | Mapa de Salas | cole SOMENTE o conteúdo no onExecute da Blank (sem tags PHP).
    Proprietário fixo: 13.
    Campos opcionais (GC, nome curto do hotel, formulário) dependem do esquema real.
-   Chave de ocorrência: os.idOrcamentoServico (CONFIRMAR NO BANCO).
+   As consultas usam apenas campos identificados no código fornecido.
 */
 $prop = 13;
 $anoAtual = (int)date('Y');
@@ -15,13 +15,13 @@ $ultimo = date('Y-m-d', strtotime($prox.' -1 day'));
 $dias = (int)date('t', strtotime($ini));
 if (!function_exists('crEsc')) {
  function crEsc($x) { return htmlspecialchars((string)$x, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8'); }
- function crIds($a) { if (!is_array($a)) return []; return array_values(array_unique(array_filter(array_map('intval',$a),function($v){return $v>0;}))); }
+ function crIds($a) { if (!is_array($a)) return array(); return array_values(array_unique(array_filter(array_map('intval',$a),function($v){return $v>0;}))); }
  function crCor($c) { return preg_match('/^#[0-9a-fA-F]{6}$/',(string)$c) ? $c : '#94a3b8'; }
 }
-$fHotel=crIds(isset($_GET['hotel'])?$_GET['hotel']:[]);
-$fStatus=crIds(isset($_GET['status'])?$_GET['status']:[]);
-$meses=[1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro'];
-$sem=['DOM','SEG','TER','QUA','QUI','SEX','SÁB'];
+$fHotel=crIds(isset($_GET['hotel'])?$_GET['hotel']:array());
+$fStatus=crIds(isset($_GET['status'])?$_GET['status']:array());
+$meses = array(1=>'Janeiro',2=>'Fevereiro',3=>'Março',4=>'Abril',5=>'Maio',6=>'Junho',7=>'Julho',8=>'Agosto',9=>'Setembro',10=>'Outubro',11=>'Novembro',12=>'Dezembro');
+$sem = array('DOM','SEG','TER','QUA','QUI','SEX','SÁB');
 
 /* Uma consulta para salas, outra para composições, outra para status e outra para ocupações. */
 $sqlSalas="SELECT s.idServico,s.idHotel,s.servico,c.idServicoPai
@@ -31,24 +31,24 @@ $sqlSalas="SELECT s.idServico,s.idHotel,s.servico,c.idServicoPai
  WHERE s.idProprietario=$prop AND s.status='Ativo' AND cat.filtroMapa='Sim'
  ORDER BY s.idHotel,s.servico,s.idServico";
 sc_lookup(dsSalas,$sqlSalas);
-$salas=[];$hoteis=[];
+$salas=array();$hoteis=array();
 if (!empty({dsSalas})) foreach ({dsSalas} as $r) {
  $id=(int)$r[0];$h=(int)$r[1];$hoteis[$h]=$h;
  if ($fHotel && !in_array($h,$fHotel,true)) continue;
  $ch=$h.':'.$id;
- if (!isset($salas[$ch])) $salas[$ch]=['id'=>$id,'hotel'=>$h,'nome'=>(string)$r[2],'pais'=>[]];
+ if (!isset($salas[$ch])) $salas[$ch]=array('id'=>$id,'hotel'=>$h,'nome'=>(string)$r[2],'pais'=>array());
  if ((int)$r[3]>0) $salas[$ch]['pais'][(int)$r[3]]=(int)$r[3];
 }
 ksort($hoteis);
 $sqlComp="SELECT idServicoPai,idServicoFilho FROM OrcamentoParametroServicoTipoComposicao";
 sc_lookup(dsComp,$sqlComp);
-$familias=[];
+$familias=array();
 if (!empty({dsComp})) foreach ({dsComp} as $r) {
  $p=(int)$r[0];$f=(int)$r[1];
  if ($p>0 && $f>0) {$familias[$p][$p]=$p;$familias[$p][$f]=$f;}
 }
 foreach ($salas as $k=>$s) {
- $set=[$s['id']=>$s['id']];
+ $set=array($s['id']=>$s['id']);
  if (isset($familias[$s['id']])) $set+=$familias[$s['id']];
  foreach ($s['pais'] as $p) if (isset($familias[$p])) $set+=$familias[$p];
  $salas[$k]['servicos']=$set;
@@ -60,9 +60,9 @@ $sqlStatus="SELECT st.id,ag.agrupador,ag.corHtml
  WHERE cat.modulo='GruposEventos' AND cat.nivel='Completo' AND cat.status='Ativo'
  ORDER BY ag.agrupador,st.id";
 sc_lookup(dsStatus,$sqlStatus);
-$status=[];
+$status=array();
 if (!empty({dsStatus})) foreach ({dsStatus} as $r) {
- $status[(int)$r[0]]=['nome'=>(string)$r[1],'cor'=>crCor($r[2])];
+ $status[(int)$r[0]]=array('nome'=>(string)$r[1],'cor'=>crCor($r[2]));
 }
 /* DISTINCT por ocorrência + atividade. Sem GROUP BY por orçamento: preserva serviços distintos.
    Se existirem várias atividades por orçamento, é necessário definir a regra da atividade vigente. */
@@ -80,34 +80,34 @@ $sqlOcup="SELECT os.idServico,os.dataInicio,os.dataFinal,
  AND os.dataInicio<'$prox' AND os.dataFinal>='$ini'
  ORDER BY os.dataInicio,os.idServico";
 sc_lookup(dsOcup,$sqlOcup);
-$porServico=[];
+$porServico=array();
 if (!empty({dsOcup})) foreach ({dsOcup} as $r) {
  $st=(int)$r[5];if ($fStatus && !in_array($st,$fStatus,true)) continue;
  $start=max($ini,substr((string)$r[1],0,10));
  $end=min($ultimo,substr((string)$r[2],0,10));
  if ($start>$end) continue;
  $serv=(int)$r[0];
- $porServico[$serv][]=['chave'=>(string)$r[3].':'.$st.':'.(string)$r[1].':'.(string)$r[2],
+ $porServico[$serv][]=array('chave'=>(string)$r[3].':'.$st.':'.(string)$r[1].':'.(string)$r[2],
  'inicio'=>(int)substr($start,8,2),'fim'=>(int)substr($end,8,2),
  'titulo'=>(string)$r[4],'orc'=>(int)$r[3],
- 'status'=>(string)$r[6],'cor'=>crCor($r[7])];
+ 'status'=>(string)$r[6],'cor'=>crCor($r[7]));
 }
 /* Montagem por linha: intervalos independentes e faixas para evitar sobreposição vertical. */
-$linhas=[];
+$linhas=array();
 foreach ($salas as $k=>$s) {
- $eventos=[];$vistos=[];
- foreach ($s['servicos'] as $id) foreach (($porServico[$id]??[]) as $o) {
+ $eventos=array();$vistos=array();
+ foreach ($s['servicos'] as $id) foreach (($porServico[$id]??array()) as $o) {
   $ch=$id.':'.$o['chave'].':'.$o['inicio'].':'.$o['fim'];
   if (isset($vistos[$ch])) continue;$vistos[$ch]=true;$eventos[]=$o;
  }
  usort($eventos,function($a,$b){return ($a['inicio']<=>$b['inicio'])?:($a['fim']<=>$b['fim']);});
- $faixas=[];$porDia=[];
+ $faixas=array();$porDia=array();
  foreach ($eventos as $o) {
   $faixa=0;
   while (isset($faixas[$faixa]) && $faixas[$faixa]>=$o['inicio']) $faixa++;
   $faixas[$faixa]=$o['fim'];$o['faixa']=$faixa;$porDia[$o['inicio']][]=$o;
  }
- $linhas[$k]=['sala'=>$s,'dias'=>$porDia,'altura'=>max(68,count($faixas)*59+8)];
+ $linhas[$k]=array('sala'=>$s,'dias'=>$porDia,'altura'=>max(68,count($faixas)*59+8));
 }
 echo '<style>
 .crm{font:12px Arial,sans-serif;color:#172b49;background:#f5f7fa;padding:12px}.crm *{box-sizing:border-box}
@@ -140,7 +140,7 @@ foreach($hoteis as $h) echo '<option value="'.$h.'"'.(in_array($h,$fHotel,true)?
 echo '</select></label><div><b>Status</b><div class="checks">';
 foreach($status as $id=>$st) echo '<label><input type="checkbox" name="status[]" value="'.$id.'"'.(!$fStatus||in_array($id,$fStatus,true)?' checked':'').'>'.crEsc($st['nome']?:'Status '.$id).'</label>';
 echo '</div></div><button type="submit">Filtrar</button></form><div class="legenda">';
-$leg=[];
+$leg=array();
 foreach($status as $st) $leg[$st['nome']]= $st['cor'];
 foreach($leg as $nome=>$cor) echo '<span><i class="ponto" style="background:'.$cor.'"></i>'.crEsc($nome).'</span>';
 echo '</div><div class="janela"><table><thead><tr><th>Salas / Espaços</th>';
@@ -159,7 +159,7 @@ foreach($linhas as $linha) {
  echo '<tr><th><span class="sala-hotel">Hotel #'.$h.'</span>'.crEsc($s['nome']).'</th>';
  for($d=1;$d<=$dias;$d++) {
   echo '<td style="height:'.$linha['altura'].'px">';
-  foreach(($linha['dias'][$d]??[]) as $o) {
+  foreach(($linha['dias'][$d]??array()) as $o) {
    $largura=($o['fim']-$o['inicio']+1)*82-6;
    $top=7+$o['faixa']*59;
    $cor=$o['cor'];
